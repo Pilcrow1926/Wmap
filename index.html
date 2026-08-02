@@ -53,7 +53,6 @@
     font-size: 11px; padding: 5px 8px; border-radius: 2px; cursor: pointer; font-weight: 700;
   }
 
-  .pw-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
   .pw-toggle-group { display: flex; gap: 4px; background: var(--bg-panel); padding: 3px; border-radius: 3px; }
 
   .pw-icon-btn {
@@ -84,12 +83,76 @@
     touch-action: none;
   }
 
-  .pw-controls { margin-top: 14px; display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  /* ---- glassmorphism HUD elements floating on top of the map ---- */
+  .pw-hud {
+    position: absolute;
+    background: rgba(20,19,17,0.5);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 9px;
+    color: var(--ink-dim);
+    z-index: 14;
+  }
+  .pw-hud-coord {
+    top: 12px; left: 12px;
+    padding: 6px 10px;
+    font-size: 10.5px;
+    color: var(--ink);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .pw-hud-fit {
+    top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .pw-hud-fit:hover { color: var(--accent); border-color: rgba(255,90,31,0.5); }
+
+  .pw-float-fab {
+    position: absolute;
+    left: 14px; bottom: 14px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(20,19,17,0.68);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 17;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+  }
+  .pw-float-fab:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.55); }
+  .pw-float-fab.pw-fab-active { box-shadow: 0 0 0 2px var(--accent), 0 8px 22px rgba(0,0,0,0.45); }
+  .pw-float-fab-swatch { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); }
+
+  .pw-float-panel {
+    position: absolute;
+    left: 14px; bottom: 68px;
+    max-width: min(280px, calc(100% - 28px));
+    background: rgba(24,23,21,0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    padding: 12px;
+    z-index: 15;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+  .pw-float-panel.pw-panel-hidden { opacity: 0; transform: translateY(8px) scale(0.97); pointer-events: none; }
+  .pw-float-panel-inner { display: flex; flex-direction: column; gap: 10px; }
+  .pw-float-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .pw-glass-toggle { background: rgba(255,255,255,0.08); }
+
   .pw-palette-block { display: flex; flex-direction: column; gap: 4px; }
   .pw-palette-label { font-size: 10px; color: var(--ink-dim); letter-spacing: 0.05em; padding-left: 2px; }
-  .pw-palette { display: flex; gap: 5px; background: var(--bg-panel); padding: 6px; border-radius: 3px; flex-wrap: wrap; max-width: 280px; }
-  .pw-swatch { width: 20px; height: 20px; border-radius: 2px; border: 2px solid transparent; cursor: pointer; padding: 0; flex: none; }
-  .pw-swatch.pw-selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--bg-outer); }
+  .pw-palette { display: flex; gap: 5px; background: rgba(255,255,255,0.06); padding: 6px; border-radius: 8px; flex-wrap: wrap; max-width: 256px; }
+  .pw-swatch { width: 20px; height: 20px; border-radius: 5px; border: 2px solid transparent; cursor: pointer; padding: 0; flex: none; }
+  .pw-swatch.pw-selected { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(255,255,255,0.3); }
   .pw-add-swatch {
     background: transparent !important;
     border: 1.5px dashed var(--ink-dim) !important;
@@ -100,17 +163,10 @@
   }
   .pw-add-swatch:hover { color: var(--accent); border-color: var(--accent) !important; }
 
-  .pw-custom { display: flex; align-items: center; gap: 6px; background: var(--bg-panel); padding: 6px 8px; border-radius: 3px; align-self: flex-start; }
-  .pw-custom input[type="color"] { width: 22px; height: 22px; border: none; border-radius: 2px; padding: 0; background: none; cursor: pointer; }
-  .pw-custom input[type="text"] { width: 68px; background: var(--bg-outer); border: 1px solid var(--accent-dim); color: var(--ink); font-family: inherit; font-size: 11px; padding: 4px 6px; border-radius: 2px; text-transform: lowercase; }
-
-  .pw-coord { font-size: 11px; color: var(--ink-dim); min-width: 150px; align-self: center; }
-
-  .pw-zoom-btn {
-    background: var(--bg-panel); border: 1px solid var(--accent-dim); color: var(--ink-dim);
-    font-family: inherit; font-size: 11px; padding: 5px 9px; border-radius: 2px; cursor: pointer;
-  }
-  .pw-zoom-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .pw-custom { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; }
+  .pw-glass-custom { background: rgba(255,255,255,0.06); }
+  .pw-custom input[type="color"] { width: 22px; height: 22px; border: none; border-radius: 5px; padding: 0; background: none; cursor: pointer; }
+  .pw-custom input[type="text"] { width: 68px; background: rgba(14,13,12,0.6); border: 1px solid rgba(255,255,255,0.16); color: var(--ink); font-family: inherit; font-size: 11px; padding: 4px 6px; border-radius: 5px; text-transform: lowercase; }
 
   .pw-hint { font-size: 10.5px; color: var(--ink-dim); margin-top: 8px; letter-spacing: 0.02em; }
 
@@ -165,8 +221,8 @@
   }
 
   @media (max-width: 420px) {
-    .pw-palette, .pw-palette-block { max-width: 100%; }
-    .pw-controls { flex-direction: column; }
+    .pw-palette { max-width: 100%; }
+    .pw-float-panel { left: 8px; right: 8px; bottom: 8px; max-width: none; }
   }
 </style>
 </head>
@@ -181,14 +237,12 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6amlrbGlyYnh0d3dycHljYWl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NTM0MTYsImV4cCI6MjEwMTIyOTQxNn0.Ieuz3kHP5-pj8R8za_c3r16gUACSis3KcM5cWtipB7Q'
   );
 
-  // personal identity: no login system, so keep a random id in this browser
   let anonId = localStorage.getItem('wmap-anon-id');
   if (!anonId) {
     anonId = crypto.randomUUID();
     localStorage.setItem('wmap-anon-id', anonId);
   }
 
-  // same get/set/delete/list signature the rest of the app already expects
   window.storage = {
     async get(key, shared) {
       const owner = shared ? 'shared' : anonId;
@@ -262,6 +316,7 @@
 
   let selectedColor = 'e63946';
   let mode = 'click';
+  let panelOpen = false;
   let isPointerDown = false, isPanning = false;
   let panLast = null, lastPaintedWorld = null;
   let drawScheduled = false;
@@ -355,42 +410,53 @@
           <div class="pw-status" id="pw-status">동기화됨</div>
         </div>
       </div>
-      <div class="pw-toolbar">
-        <div class="pw-toggle-group" id="pw-mode-toggle">
-          <button class="pw-icon-btn" data-mode="click" title="클릭 모드: 클릭한 픽셀 하나만 칠하기" aria-label="클릭 모드">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 3L20 12.5L13.5 13.8L17.5 20.5L14.8 22L10.8 15.3L6 20V3Z" fill="currentColor"/>
-            </svg>
-          </button>
-          <button class="pw-icon-btn" data-mode="brush" title="브러시 모드: 드래그하면 지나가는 픽셀을 계속 칠하기" aria-label="브러시 모드">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3C20.1 3 21 3.9 21 5C21 5.7 20.7 6.3 20.1 6.7L12.4 12.6C13 13.3 13 14.4 12.3 15.1L9.5 17.9C8.6 18.8 7.2 18.8 6.3 17.9L6.1 17.7C5.7 18.8 4.9 19.7 3.8 20.2C3.2 20.5 2.5 20.1 2.5 19.4C2.5 19.2 2.6 19 2.7 18.8C3.1 18.2 3.4 17.4 3.4 16.6C3.4 14.9 4.8 13.5 6.5 13.5C7.3 13.5 8 13.8 8.6 14.3L11.4 11.5C10.7 10.8 10.7 9.7 11.4 9L17.3 3.9C17.7 3.3 18.3 3 19 3Z" fill="currentColor"/>
-            </svg>
-          </button>
-        </div>
-        <button class="pw-zoom-btn" id="pw-fit">전체보기</button>
-      </div>
       <div class="pw-wall-frame">
         <canvas id="pw-canvas" width="${DISPLAY_PX}" height="${DISPLAY_PX}"></canvas>
-      </div>
-      <div class="pw-controls">
-        <div class="pw-palette-block">
-          <span class="pw-palette-label">기본 팔레트</span>
-          <div class="pw-palette" id="pw-palette"></div>
+
+        <div class="pw-hud pw-hud-coord" id="pw-coord">&nbsp;</div>
+        <button class="pw-hud pw-hud-fit" id="pw-fit" title="전체보기" aria-label="전체보기">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <button class="pw-float-fab" id="pw-float-fab" title="팔레트 열기/닫기" aria-label="팔레트 열기/닫기">
+          <span class="pw-float-fab-swatch" id="pw-float-fab-swatch" style="background:#${selectedColor}"></span>
+        </button>
+
+        <div class="pw-float-panel pw-panel-hidden" id="pw-float-panel">
+          <div class="pw-float-panel-inner">
+            <div class="pw-toggle-group pw-glass-toggle" id="pw-mode-toggle">
+                <button class="pw-icon-btn" data-mode="click" title="클릭 모드: 클릭한 픽셀 하나만 칠하기" aria-label="클릭 모드">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3L20 12.5L13.5 13.8L17.5 20.5L14.8 22L10.8 15.3L6 20V3Z" fill="currentColor"/>
+                  </svg>
+                </button>
+                <button class="pw-icon-btn" data-mode="brush" title="브러시 모드: 드래그하면 지나가는 픽셀을 계속 칠하기" aria-label="브러시 모드">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3C20.1 3 21 3.9 21 5C21 5.7 20.7 6.3 20.1 6.7L12.4 12.6C13 13.3 13 14.4 12.3 15.1L9.5 17.9C8.6 18.8 7.2 18.8 6.3 17.9L6.1 17.7C5.7 18.8 4.9 19.7 3.8 20.2C3.2 20.5 2.5 20.1 2.5 19.4C2.5 19.2 2.6 19 2.7 18.8C3.1 18.2 3.4 17.4 3.4 16.6C3.4 14.9 4.8 13.5 6.5 13.5C7.3 13.5 8 13.8 8.6 14.3L11.4 11.5C10.7 10.8 10.7 9.7 11.4 9L17.3 3.9C17.7 3.3 18.3 3 19 3Z" fill="currentColor"/>
+                  </svg>
+                </button>
+            </div>
+            <div class="pw-palette-block">
+              <span class="pw-palette-label">기본 팔레트</span>
+              <div class="pw-palette" id="pw-palette"></div>
+            </div>
+            <div class="pw-palette-block">
+              <span class="pw-palette-label">내 색상 (개인 저장)</span>
+              <div class="pw-palette" id="pw-saved"></div>
+            </div>
+            <div class="pw-custom pw-glass-custom">
+              <input type="color" id="pw-color-picker" value="#${selectedColor}">
+              <input type="text" id="pw-hex-input" maxlength="7" value="#${selectedColor}">
+            </div>
+          </div>
         </div>
-        <div class="pw-palette-block">
-          <span class="pw-palette-label">내 색상 (개인 저장)</span>
-          <div class="pw-palette" id="pw-saved"></div>
-        </div>
-        <div class="pw-custom">
-          <input type="color" id="pw-color-picker" value="#${selectedColor}">
-          <input type="text" id="pw-hex-input" maxlength="7" value="#${selectedColor}">
-        </div>
-        <div class="pw-coord" id="pw-coord">&nbsp;</div>
       </div>
       <p class="pw-hint">스크롤: 위/아래 · Shift+스크롤: 좌/우 · Ctrl(⌘)+스크롤 또는 핀치: 확대·축소 · 휠클릭 드래그: 화면 이동 · 우클릭: 픽셀/청크 정보</p>
       <div class="pw-footer">
         <span id="pw-info">총 ${TOTAL}×${TOTAL}px · 청크 ${CHUNKS}×${CHUNKS}개 · 대청크 ${Math.round(CHUNKS / SUPERCHUNK)}×${Math.round(CHUNKS / SUPERCHUNK)}개</span>
+
         <div class="pw-vote-block">
           <span class="pw-vote-status" id="pw-vote-status">투표 불러오는 중…</span>
           <div class="pw-vote-buttons">
@@ -428,6 +494,11 @@
       zoom = minZoom; rawZoom = minZoom; originX = 0; originY = 0; requestDraw();
     });
 
+    document.getElementById('pw-float-fab').addEventListener('click', () => {
+      panelOpen = !panelOpen; updatePanelVisibility();
+    });
+    updatePanelVisibility();
+
     const palette = document.getElementById('pw-palette');
     PALETTE.forEach((color) => {
       const btn = document.createElement('button');
@@ -446,6 +517,7 @@
       selectedColor = colorPicker.value.replace('#', '').toLowerCase();
       hexInput.value = '#' + selectedColor;
       clearSelectionHighlight();
+      syncFabSwatch();
     });
     hexInput.addEventListener('change', () => {
       const v = hexInput.value.replace('#', '').toLowerCase();
@@ -453,6 +525,7 @@
         selectedColor = v;
         colorPicker.value = '#' + v;
         clearSelectionHighlight();
+        syncFabSwatch();
       } else {
         hexInput.value = '#' + selectedColor;
       }
@@ -480,6 +553,18 @@
     syncPickerUI();
     clearSelectionHighlight();
     document.querySelectorAll('.pw-swatch').forEach(b => { if (b.dataset.hex === hex) b.classList.add('pw-selected'); });
+    syncFabSwatch();
+  }
+  function syncFabSwatch() {
+    const sw = document.getElementById('pw-float-fab-swatch');
+    if (sw) sw.style.background = '#' + selectedColor;
+  }
+  function updatePanelVisibility() {
+    const panel = document.getElementById('pw-float-panel');
+    const fab = document.getElementById('pw-float-fab');
+    if (!panel || !fab) return;
+    panel.classList.toggle('pw-panel-hidden', !panelOpen);
+    fab.classList.toggle('pw-fab-active', panelOpen);
   }
   function clearSelectionHighlight() { document.querySelectorAll('.pw-swatch').forEach(b => b.classList.remove('pw-selected')); }
   function syncPickerUI() {
