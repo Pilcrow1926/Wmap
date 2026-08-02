@@ -32,12 +32,6 @@
   }
   #pw-root * { box-sizing: border-box; }
 
-  .pw-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-  .pw-title { font-size: clamp(16px, 4vw, 20px); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin: 0; }
-  .pw-title span { color: var(--accent); }
-  .pw-header-right { display: flex; align-items: center; gap: 10px; }
-  .pw-status { font-size: 11px; color: var(--ink-dim); letter-spacing: 0.04em; }
-  .pw-status.pw-syncing { color: var(--accent); }
   .pw-nickname-btn {
     background: var(--bg-panel); border: 1px solid var(--accent-dim); color: var(--ink-dim);
     font-family: inherit; font-size: 11px; padding: 5px 9px; border-radius: 2px; cursor: pointer;
@@ -70,16 +64,16 @@
     border-radius: 3px;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
     width: 100%;
+    margin: 0 auto;
     position: relative;
   }
   #pw-canvas {
     image-rendering: pixelated;
     cursor: crosshair;
     display: block;
-    background: #ffffff;
+    background: #000000;
     width: 100%;
-    height: auto;
-    aspect-ratio: 1 / 1;
+    height: 100%;
     touch-action: none;
   }
 
@@ -99,9 +93,20 @@
     padding: 6px 10px;
     font-size: 10.5px;
     color: var(--ink);
+    display: flex; align-items: center; gap: 7px;
     pointer-events: none;
     white-space: nowrap;
   }
+  .pw-sync-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #3ecf6e;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.3);
+    flex: none;
+    transition: background 0.2s ease;
+  }
+  .pw-sync-dot.pw-sync-syncing { background: #ffb020; animation: pw-sync-pulse 1s ease-in-out infinite; }
+  .pw-sync-dot.pw-sync-error { background: #ff4d4f; }
+  @keyframes pw-sync-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
   .pw-hud-fit {
     top: 12px; right: 12px;
     width: 32px; height: 32px;
@@ -109,6 +114,64 @@
     cursor: pointer;
   }
   .pw-hud-fit:hover { color: var(--accent); border-color: rgba(255,90,31,0.5); }
+  .pw-hud-timelapse {
+    top: 12px; right: 52px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .pw-hud-timelapse:hover { color: var(--accent); border-color: rgba(255,90,31,0.5); }
+  .pw-hud-info {
+    top: 12px; right: 92px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .pw-hud-info:hover { color: var(--accent); border-color: rgba(255,90,31,0.5); }
+
+  .pw-timelapse-modal {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,9,8,0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 50;
+    padding: 16px;
+  }
+  .pw-timelapse-modal.pw-modal-hidden { display: none; }
+  .pw-timelapse-card {
+    width: min(480px, 100%);
+    background: rgba(28,27,25,0.85);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    padding: 16px;
+    color: var(--ink);
+    font-family: inherit;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+  .pw-timelapse-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .pw-timelapse-title { font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-size: 13px; }
+  .pw-timelapse-close { background: none; border: none; color: var(--ink-dim); font-size: 18px; cursor: pointer; padding: 4px; }
+  .pw-timelapse-close:hover { color: var(--accent); }
+  .pw-timelapse-empty { font-size: 12px; color: var(--ink-dim); padding: 30px 10px; text-align: center; }
+  .pw-timelapse-canvas-wrap { background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  #pw-timelapse-canvas { width: 100%; height: auto; display: block; background: #fff; image-rendering: pixelated; }
+  .pw-timelapse-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pw-timelapse-controls input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+  .pw-timelapse-btn {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: var(--ink);
+    font-family: inherit; font-size: 11px; padding: 6px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap;
+  }
+  .pw-timelapse-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pw-timelapse-speed {
+    background: rgba(14,13,12,0.6); border: 1px solid rgba(255,255,255,0.18); color: var(--ink);
+    font-family: inherit; font-size: 11px; padding: 5px 6px; border-radius: 6px;
+  }
+  .pw-timelapse-meta { font-size: 10.5px; color: var(--ink-dim); margin-top: 8px; }
 
   .pw-float-fab {
     position: absolute;
@@ -147,6 +210,19 @@
   .pw-float-panel-inner { display: flex; flex-direction: column; gap: 10px; }
   .pw-float-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .pw-glass-toggle { background: rgba(255,255,255,0.08); }
+  .pw-brush-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pw-size-stepper {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08); border-radius: 6px; padding: 3px 4px;
+  }
+  .pw-size-btn {
+    width: 20px; height: 20px; border-radius: 4px;
+    background: none; border: none; color: var(--ink-dim);
+    font-size: 13px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pw-size-btn:hover { background: rgba(255,255,255,0.12); color: var(--ink); }
+  #pw-size-value { font-size: 10.5px; color: var(--ink-dim); min-width: 30px; text-align: center; }
 
   .pw-palette-block { display: flex; flex-direction: column; gap: 4px; }
   .pw-palette-label { font-size: 10px; color: var(--ink-dim); letter-spacing: 0.05em; padding-left: 2px; }
@@ -168,9 +244,12 @@
   .pw-custom input[type="color"] { width: 22px; height: 22px; border: none; border-radius: 5px; padding: 0; background: none; cursor: pointer; }
   .pw-custom input[type="text"] { width: 68px; background: rgba(14,13,12,0.6); border: 1px solid rgba(255,255,255,0.16); color: var(--ink); font-family: inherit; font-size: 11px; padding: 4px 6px; border-radius: 5px; text-transform: lowercase; }
 
-  .pw-hint { font-size: 10.5px; color: var(--ink-dim); margin-top: 8px; letter-spacing: 0.02em; }
+  .pw-info-content { display: flex; flex-direction: column; gap: 16px; }
+  .pw-info-section-title { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 6px; }
+  .pw-info-row { font-size: 12px; color: var(--ink); padding: 2px 0; }
 
   .pw-footer { margin-top: 12px; font-size: 11px; color: var(--ink-dim); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pw-footer-left { display: flex; align-items: center; gap: 8px; }
   .pw-vote-block { display: flex; align-items: center; gap: 8px; }
   .pw-vote-status { font-size: 10.5px; color: var(--ink-dim); white-space: nowrap; }
   .pw-vote-buttons { display: flex; gap: 5px; }
@@ -277,12 +356,39 @@
     }
   };
 
+  window.wmapLog = async function (entries) {
+    if (!entries || entries.length === 0) return;
+    const rows = entries.map(e => ({ x: e.x, y: e.y, color: e.color, author: e.author || null }));
+    const { error } = await supabase.from('pixel_log').insert(rows);
+    if (error) throw error;
+  };
+
+  window.wmapFetchLog = async function (maxEvents) {
+    const limit = maxEvents || 20000;
+    const pageSize = 1000;
+    let all = [];
+    let from = 0;
+    while (all.length < limit) {
+      const to = from + pageSize - 1;
+      const { data, error } = await supabase
+        .from('pixel_log')
+        .select('x,y,color,author,created_at')
+        .order('created_at', { ascending: true })
+        .range(from, to);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      all = all.concat(data);
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+    return all.slice(0, limit);
+  };
+
 
 (function () {
   const ROOT = document.getElementById('pw-root');
   const CHUNK = 16;
   const SUPERCHUNK = 16;
-  const DISPLAY_PX = 640;
   const BG_COLOR = 'ffffff';
   const MAX_ZOOM = 32;
   const PIXEL_LINE_ZOOM_THRESHOLD = 8;
@@ -299,7 +405,8 @@
 
   const CHUNKS = 128;
   const TOTAL = CHUNKS * CHUNK;
-  let minZoom = DISPLAY_PX / TOTAL;
+  let viewportW = 640, viewportH = 640; // canvas's actual internal resolution — rectangular, not forced square
+  let minZoom = Math.min(viewportW, viewportH) / TOTAL;
   let zoom = minZoom;
   let rawZoom = minZoom; // continuous accumulator; zoom itself is snapped from this
   let originX = 0, originY = 0;
@@ -317,6 +424,16 @@
   let selectedColor = 'e63946';
   let mode = 'click';
   let panelOpen = false;
+  let brushRadius = 0;      // 0 = single pixel; radius in world-pixels around the cursor
+  let brushShape = 'square'; // 'square' | 'circle'
+  let stampOffsetsCache = new Map();
+  let timelapseEvents = [];
+  let timelapseIndex = 0;
+  let timelapsePlaying = false;
+  let timelapseSpeed = 40;
+  let timelapseGrid = null;
+  let timelapseCanvas = null, timelapseCtx = null;
+  let timelapseAnimHandle = null;
   let isPointerDown = false, isPanning = false;
   let panLast = null, lastPaintedWorld = null;
   let drawScheduled = false;
@@ -325,7 +442,7 @@
   let touchMode = null;
   let touchStartDist = 0, touchStartZoom = 1, touchStartRawZoom = 1, touchStartMid = null, touchStartOrigin = null;
 
-  let canvas, ctx, coordEl, statusEl;
+  let canvas, ctx, coordEl, syncDotEl;
 
   ROOT.innerHTML = '<div class="pw-loading">벽을 불러오는 중…</div>';
 
@@ -403,20 +520,29 @@
 
   function buildUI() {
     ROOT.innerHTML = `
-      <div class="pw-header">
-        <h2 class="pw-title">W<span>map</span></h2>
-        <div class="pw-header-right">
-          <span class="pw-nickname-wrap" id="pw-nickname-wrap"></span>
-          <div class="pw-status" id="pw-status">동기화됨</div>
-        </div>
-      </div>
       <div class="pw-wall-frame">
-        <canvas id="pw-canvas" width="${DISPLAY_PX}" height="${DISPLAY_PX}"></canvas>
+        <canvas id="pw-canvas" width="${viewportW}" height="${viewportH}"></canvas>
 
-        <div class="pw-hud pw-hud-coord" id="pw-coord">&nbsp;</div>
+        <div class="pw-hud pw-hud-coord" id="pw-coord-wrap">
+          <span class="pw-sync-dot" id="pw-sync-dot" title="동기화됨"></span>
+          <span id="pw-coord">&nbsp;</span>
+        </div>
         <button class="pw-hud pw-hud-fit" id="pw-fit" title="전체보기" aria-label="전체보기">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="pw-hud pw-hud-timelapse" id="pw-timelapse-open" title="타임랩스" aria-label="타임랩스">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 2h6M12 2v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="pw-hud pw-hud-info" id="pw-info-open" title="정보" aria-label="정보">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M12 11v5.5M12 8v.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
         </button>
 
@@ -438,6 +564,25 @@
                   </svg>
                 </button>
             </div>
+            <div class="pw-brush-controls">
+              <div class="pw-toggle-group pw-glass-toggle" id="pw-shape-toggle">
+                <button class="pw-icon-btn" data-shape="square" title="사각형 브러시" aria-label="사각형 브러시">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="5" y="5" width="14" height="14" rx="1" fill="currentColor"/>
+                  </svg>
+                </button>
+                <button class="pw-icon-btn" data-shape="circle" title="원형 브러시" aria-label="원형 브러시">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="7" fill="currentColor"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="pw-size-stepper">
+                <button class="pw-size-btn" id="pw-size-minus" aria-label="브러시 크기 줄이기">−</button>
+                <span id="pw-size-value">1px</span>
+                <button class="pw-size-btn" id="pw-size-plus" aria-label="브러시 크기 키우기">+</button>
+              </div>
+            </div>
             <div class="pw-palette-block">
               <span class="pw-palette-label">기본 팔레트</span>
               <div class="pw-palette" id="pw-palette"></div>
@@ -453,10 +598,45 @@
           </div>
         </div>
       </div>
-      <p class="pw-hint">스크롤: 위/아래 · Shift+스크롤: 좌/우 · Ctrl(⌘)+스크롤 또는 핀치: 확대·축소 · 휠클릭 드래그: 화면 이동 · 우클릭: 픽셀/청크 정보</p>
+      <div class="pw-timelapse-modal pw-modal-hidden" id="pw-timelapse-modal">
+        <div class="pw-timelapse-card">
+          <div class="pw-timelapse-header">
+            <span class="pw-timelapse-title">타임랩스</span>
+            <button class="pw-timelapse-close" id="pw-timelapse-close" aria-label="닫기">×</button>
+          </div>
+          <div id="pw-timelapse-body">
+            <div class="pw-timelapse-empty">불러오는 중…</div>
+          </div>
+        </div>
+      </div>
+      <div class="pw-timelapse-modal pw-modal-hidden" id="pw-info-modal">
+        <div class="pw-timelapse-card">
+          <div class="pw-timelapse-header">
+            <span class="pw-timelapse-title">정보</span>
+            <button class="pw-timelapse-close" id="pw-info-close" aria-label="닫기">×</button>
+          </div>
+          <div class="pw-info-content">
+            <div class="pw-info-section">
+              <div class="pw-info-section-title">지도</div>
+              <div class="pw-info-row">총 ${TOTAL}×${TOTAL}px</div>
+              <div class="pw-info-row">청크 ${CHUNKS}×${CHUNKS}개</div>
+              <div class="pw-info-row">대청크 ${Math.round(CHUNKS / SUPERCHUNK)}×${Math.round(CHUNKS / SUPERCHUNK)}개</div>
+            </div>
+            <div class="pw-info-section">
+              <div class="pw-info-section-title">조작법</div>
+              <div class="pw-info-row">스크롤 — 위/아래 이동</div>
+              <div class="pw-info-row">Shift + 스크롤 — 좌/우 이동</div>
+              <div class="pw-info-row">Ctrl(⌘) + 스크롤 또는 핀치 — 확대·축소</div>
+              <div class="pw-info-row">휠클릭 드래그 — 화면 이동</div>
+              <div class="pw-info-row">우클릭 — 픽셀/청크 정보</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="pw-footer">
-        <span id="pw-info">총 ${TOTAL}×${TOTAL}px · 청크 ${CHUNKS}×${CHUNKS}개 · 대청크 ${Math.round(CHUNKS / SUPERCHUNK)}×${Math.round(CHUNKS / SUPERCHUNK)}개</span>
-
+        <div class="pw-footer-left">
+          <span class="pw-nickname-wrap" id="pw-nickname-wrap"></span>
+        </div>
         <div class="pw-vote-block">
           <span class="pw-vote-status" id="pw-vote-status">투표 불러오는 중…</span>
           <div class="pw-vote-buttons">
@@ -478,7 +658,7 @@
     ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     coordEl = document.getElementById('pw-coord');
-    statusEl = document.getElementById('pw-status');
+    syncDotEl = document.getElementById('pw-sync-dot');
 
     renderNicknameControl();
 
@@ -490,14 +670,46 @@
         btn.classList.add('pw-active');
       });
     });
+
+    document.getElementById('pw-shape-toggle').querySelectorAll('.pw-icon-btn').forEach(btn => {
+      if (btn.dataset.shape === brushShape) btn.classList.add('pw-active');
+      btn.addEventListener('click', () => {
+        brushShape = btn.dataset.shape;
+        document.querySelectorAll('#pw-shape-toggle .pw-icon-btn').forEach(b => b.classList.remove('pw-active'));
+        btn.classList.add('pw-active');
+      });
+    });
+    function updateBrushSizeLabel() {
+      const el = document.getElementById('pw-size-value');
+      if (el) el.textContent = (brushRadius * 2 + 1) + 'px';
+    }
+    document.getElementById('pw-size-minus').addEventListener('click', () => {
+      brushRadius = Math.max(0, brushRadius - 1);
+      updateBrushSizeLabel();
+    });
+    document.getElementById('pw-size-plus').addEventListener('click', () => {
+      brushRadius = Math.min(8, brushRadius + 1);
+      updateBrushSizeLabel();
+    });
+    updateBrushSizeLabel();
+
     document.getElementById('pw-fit').addEventListener('click', () => {
-      zoom = minZoom; rawZoom = minZoom; originX = 0; originY = 0; requestDraw();
+      zoom = minZoom; rawZoom = minZoom; clampOrigin(); requestDraw();
     });
 
     document.getElementById('pw-float-fab').addEventListener('click', () => {
       panelOpen = !panelOpen; updatePanelVisibility();
     });
     updatePanelVisibility();
+
+    document.getElementById('pw-timelapse-open').addEventListener('click', openTimelapseModal);
+    document.getElementById('pw-timelapse-close').addEventListener('click', closeTimelapseModal);
+    document.getElementById('pw-info-open').addEventListener('click', () => {
+      document.getElementById('pw-info-modal').classList.remove('pw-modal-hidden');
+    });
+    document.getElementById('pw-info-close').addEventListener('click', () => {
+      document.getElementById('pw-info-modal').classList.add('pw-modal-hidden');
+    });
 
     const palette = document.getElementById('pw-palette');
     PALETTE.forEach((color) => {
@@ -545,6 +757,66 @@
     canvas.addEventListener('touchmove', onTouchMove, { passive: false });
     canvas.addEventListener('touchend', onTouchEnd, { passive: false });
 
+    fitWallFrameToViewport();
+    if (!window.__wmapResizeBound) {
+      window.__wmapResizeBound = true;
+      window.addEventListener('resize', fitWallFrameToViewport);
+    }
+
+    requestDraw();
+  }
+
+  // sizes the square map box to whichever is smaller — available width or
+  // available height — so the whole map always fits without scrolling.
+  // Available height is measured from the real leftover space (window height
+  // minus the header/hint/footer that actually render around it), not a
+  // rough guess, so on wide/landscape screens the map uses as much room as
+  // it actually has instead of shrinking more than necessary.
+  function fitWallFrameToViewport() {
+    const frame = document.querySelector('.pw-wall-frame');
+    if (!frame || !frame.parentElement) return;
+    frame.style.width = '';
+    frame.style.height = '';
+    const root = frame.parentElement;
+    const rootStyle = getComputedStyle(root);
+    const parentWidth = root.clientWidth - parseFloat(rootStyle.paddingLeft || 0) - parseFloat(rootStyle.paddingRight || 0);
+
+    let usedHeight = 0;
+    Array.from(root.children).forEach(child => {
+      if (child === frame) return;
+      const cs = getComputedStyle(child);
+      if (cs.position === 'fixed' || cs.display === 'none') return;
+      const r = child.getBoundingClientRect();
+      usedHeight += r.height + parseFloat(cs.marginTop || 0) + parseFloat(cs.marginBottom || 0);
+    });
+    usedHeight += parseFloat(rootStyle.paddingTop || 0) + parseFloat(rootStyle.paddingBottom || 0);
+
+    const buffer = 16; // small breathing room
+    const availableHeight = Math.max(200, window.innerHeight - usedHeight - buffer);
+    const availableWidth = Math.max(240, parentWidth);
+
+    // rectangular, not forced square — a wide window gets a wide map, a tall
+    // one gets a tall map. The map itself stays a square and is centered
+    // (clampOrigin) with blank space on whichever axis has extra room.
+    frame.style.width = availableWidth + 'px';
+    frame.style.height = availableHeight + 'px';
+
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const newW = Math.max(60, Math.round(rect.width));
+      const newH = Math.max(60, Math.round(rect.height));
+      if (newW !== viewportW || newH !== viewportH) {
+        viewportW = newW;
+        viewportH = newH;
+        canvas.width = viewportW;
+        canvas.height = viewportH;
+        ctx.imageSmoothingEnabled = false;
+        minZoom = Math.min(viewportW, viewportH) / TOTAL;
+        zoom = Math.max(zoom, minZoom);
+        rawZoom = Math.max(rawZoom, minZoom);
+        clampOrigin();
+      }
+    }
     requestDraw();
   }
 
@@ -565,6 +837,207 @@
     if (!panel || !fab) return;
     panel.classList.toggle('pw-panel-hidden', !panelOpen);
     fab.classList.toggle('pw-fab-active', panelOpen);
+  }
+
+  // ---- timelapse (pixel-level history replay) ----
+  async function openTimelapseModal() {
+    const modal = document.getElementById('pw-timelapse-modal');
+    modal.classList.remove('pw-modal-hidden');
+    renderTimelapseBody('loading');
+    if (typeof window.wmapFetchLog !== 'function') {
+      renderTimelapseBody('unavailable');
+      return;
+    }
+    let events;
+    try {
+      events = await window.wmapFetchLog(20000);
+    } catch (e) {
+      renderTimelapseBody('error');
+      return;
+    }
+    if (!events || events.length === 0) {
+      renderTimelapseBody('empty');
+      return;
+    }
+    timelapseEvents = events;
+    timelapseIndex = 0;
+    timelapseGrid = new Map();
+    timelapsePlaying = false;
+    renderTimelapseBody('player');
+    timelapseCanvas = document.getElementById('pw-timelapse-canvas');
+    timelapseCtx = timelapseCanvas.getContext('2d');
+    timelapseCtx.imageSmoothingEnabled = false;
+    drawTimelapseFrame();
+  }
+
+  function closeTimelapseModal() {
+    timelapsePlaying = false;
+    if (timelapseAnimHandle) cancelAnimationFrame(timelapseAnimHandle);
+    document.getElementById('pw-timelapse-modal').classList.add('pw-modal-hidden');
+  }
+
+  function renderTimelapseBody(state) {
+    const body = document.getElementById('pw-timelapse-body');
+    if (!body) return;
+    if (state === 'loading') {
+      body.innerHTML = '<div class="pw-timelapse-empty">기록을 불러오는 중…</div>';
+    } else if (state === 'unavailable') {
+      body.innerHTML = '<div class="pw-timelapse-empty">타임랩스는 배포된 사이트(Supabase 연결)에서만 볼 수 있어요. 지금은 미리보기 환경입니다.</div>';
+    } else if (state === 'error') {
+      body.innerHTML = '<div class="pw-timelapse-empty">기록을 불러오지 못했어요.</div>';
+    } else if (state === 'empty') {
+      body.innerHTML = '<div class="pw-timelapse-empty">아직 기록된 픽셀이 없어요. 지금부터 그리면 여기 쌓이기 시작해요.</div>';
+    } else if (state === 'player') {
+      body.innerHTML = `
+        <div class="pw-timelapse-canvas-wrap">
+          <canvas id="pw-timelapse-canvas" width="440" height="440"></canvas>
+        </div>
+        <div class="pw-timelapse-controls">
+          <button class="pw-timelapse-btn" id="pw-tl-play">▶ 재생</button>
+          <input type="range" id="pw-tl-scrub" min="0" max="${timelapseEvents.length}" value="0">
+          <select class="pw-timelapse-speed" id="pw-tl-speed">
+            <option value="10">1x</option>
+            <option value="40" selected>4x</option>
+            <option value="160">16x</option>
+            <option value="640">64x</option>
+          </select>
+        </div>
+        <div class="pw-timelapse-meta" id="pw-tl-meta">0 / ${timelapseEvents.length}개 픽셀</div>
+        <div class="pw-timelapse-controls" style="margin-top:8px;">
+          <button class="pw-timelapse-btn" id="pw-tl-gif">GIF로 내보내기</button>
+          <span class="pw-timelapse-meta" id="pw-tl-gif-status"></span>
+        </div>
+      `;
+      document.getElementById('pw-tl-play').addEventListener('click', toggleTimelapsePlay);
+      document.getElementById('pw-tl-scrub').addEventListener('input', (e) => {
+        timelapsePlaying = false;
+        updateTimelapsePlayLabel();
+        seekTimelapse(parseInt(e.target.value, 10));
+      });
+      document.getElementById('pw-tl-speed').addEventListener('change', (e) => {
+        timelapseSpeed = parseInt(e.target.value, 10);
+      });
+      document.getElementById('pw-tl-gif').addEventListener('click', exportTimelapseGif);
+    }
+  }
+
+  function drawTimelapseFrame() {
+    if (!timelapseCtx) return;
+    const scale = timelapseCanvas.width / TOTAL;
+    timelapseCtx.fillStyle = '#ffffff';
+    timelapseCtx.fillRect(0, 0, timelapseCanvas.width, timelapseCanvas.height);
+    const s = Math.max(1, Math.ceil(scale));
+    timelapseGrid.forEach((color, key) => {
+      const [x, y] = key.split('_').map(Number);
+      timelapseCtx.fillStyle = '#' + color;
+      timelapseCtx.fillRect(Math.floor(x * scale), Math.floor(y * scale), s, s);
+    });
+  }
+
+  function seekTimelapse(targetIndex) {
+    targetIndex = Math.max(0, Math.min(timelapseEvents.length, targetIndex));
+    if (targetIndex < timelapseIndex) {
+      timelapseGrid = new Map();
+      timelapseIndex = 0;
+    }
+    for (; timelapseIndex < targetIndex; timelapseIndex++) {
+      const ev = timelapseEvents[timelapseIndex];
+      timelapseGrid.set(`${ev.x}_${ev.y}`, ev.color);
+    }
+    drawTimelapseFrame();
+    const scrub = document.getElementById('pw-tl-scrub');
+    if (scrub) scrub.value = timelapseIndex;
+    const meta = document.getElementById('pw-tl-meta');
+    if (meta) meta.textContent = `${timelapseIndex} / ${timelapseEvents.length}개 픽셀`;
+  }
+
+  function updateTimelapsePlayLabel() {
+    const btn = document.getElementById('pw-tl-play');
+    if (btn) btn.textContent = timelapsePlaying ? '⏸ 일시정지' : '▶ 재생';
+  }
+
+  function toggleTimelapsePlay() {
+    timelapsePlaying = !timelapsePlaying;
+    updateTimelapsePlayLabel();
+    if (timelapsePlaying) timelapseTick();
+  }
+
+  function timelapseTick() {
+    if (!timelapsePlaying) return;
+    if (timelapseIndex >= timelapseEvents.length) {
+      timelapsePlaying = false;
+      updateTimelapsePlayLabel();
+      return;
+    }
+    seekTimelapse(timelapseIndex + timelapseSpeed);
+    timelapseAnimHandle = requestAnimationFrame(timelapseTick);
+  }
+
+  async function ensureGifLib() {
+    if (window.GIF) return;
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function exportTimelapseGif() {
+    const statusEl2 = document.getElementById('pw-tl-gif-status');
+    const wasPlaying = timelapsePlaying;
+    timelapsePlaying = false;
+    updateTimelapsePlayLabel();
+    const savedIndex = timelapseIndex;
+    const savedGrid = timelapseGrid;
+    try {
+      if (statusEl2) statusEl2.textContent = '준비 중…';
+      await ensureGifLib();
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: timelapseCanvas.width,
+        height: timelapseCanvas.height,
+        workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+      });
+
+      timelapseGrid = new Map();
+      timelapseIndex = 0;
+      const frameCount = 90;
+      const step = Math.max(1, Math.ceil(timelapseEvents.length / frameCount));
+
+      for (let i = 0; i <= timelapseEvents.length; i += step) {
+        seekTimelapse(i);
+        gif.addFrame(timelapseCtx, { copy: true, delay: 80 });
+        if (statusEl2) statusEl2.textContent = `프레임 생성 중… ${Math.min(i, timelapseEvents.length)}/${timelapseEvents.length}`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+      seekTimelapse(timelapseEvents.length);
+      gif.addFrame(timelapseCtx, { copy: true, delay: 1200 });
+
+      gif.on('finished', (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'wmap-timelapse.gif';
+        a.click();
+        if (statusEl2) statusEl2.textContent = '완료! 다운로드됨';
+        timelapseGrid = savedGrid;
+        timelapseIndex = savedIndex;
+        drawTimelapseFrame();
+        const scrub = document.getElementById('pw-tl-scrub');
+        if (scrub) scrub.value = timelapseIndex;
+        const meta = document.getElementById('pw-tl-meta');
+        if (meta) meta.textContent = `${timelapseIndex} / ${timelapseEvents.length}개 픽셀`;
+      });
+      gif.render();
+    } catch (e) {
+      if (statusEl2) statusEl2.textContent = 'GIF 생성 실패';
+      timelapseGrid = savedGrid;
+      timelapseIndex = savedIndex;
+      drawTimelapseFrame();
+    }
   }
   function clearSelectionHighlight() { document.querySelectorAll('.pw-swatch').forEach(b => b.classList.remove('pw-selected')); }
   function syncPickerUI() {
@@ -623,9 +1096,9 @@
     return { sx: (clientX - rect.left) * scaleX, sy: (clientY - rect.top) * scaleY, rect, scaleX, scaleY };
   }
   function clampOrigin() {
-    const viewW = DISPLAY_PX / zoom, viewH = DISPLAY_PX / zoom;
-    originX = clamp(originX, 0, Math.max(0, TOTAL - viewW));
-    originY = clamp(originY, 0, Math.max(0, TOTAL - viewH));
+    const viewW = viewportW / zoom, viewH = viewportH / zoom;
+    originX = (viewW >= TOTAL) ? (TOTAL - viewW) / 2 : clamp(originX, 0, TOTAL - viewW);
+    originY = (viewH >= TOTAL) ? (TOTAL - viewH) / 2 : clamp(originY, 0, TOTAL - viewH);
   }
   function requestDraw() {
     if (drawScheduled) return;
@@ -777,7 +1250,7 @@
     isPointerDown = true;
     const gx = Math.floor(originX + sx / zoom), gy = Math.floor(originY + sy / zoom);
     lastPaintedWorld = { x: gx, y: gy };
-    paintWorldPixel(gx, gy).then(requestDraw);
+    stampWorldPixel(gx, gy).then(requestDraw);
   }
 
   function onMouseMove(e) {
@@ -825,7 +1298,7 @@
       const gx = Math.floor(originX + sx / zoom), gy = Math.floor(originY + sy / zoom);
       lastPaintedWorld = { x: gx, y: gy };
       isPointerDown = true;
-      paintWorldPixel(gx, gy).then(requestDraw);
+      stampWorldPixel(gx, gy).then(requestDraw);
     } else if (e.touches.length === 2) {
       touchMode = 'gesture';
       isPointerDown = false;
@@ -879,10 +1352,17 @@
   // ---- drawing ----
   function draw() {
     if (!ctx) return;
+    // outside the paintable 0..TOTAL map area is black; inside it is white
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, viewportW, viewportH);
+    const mapX0 = Math.round((0 - originX) * zoom);
+    const mapY0 = Math.round((0 - originY) * zoom);
+    const mapX1 = Math.round((TOTAL - originX) * zoom);
+    const mapY1 = Math.round((TOTAL - originY) * zoom);
     ctx.fillStyle = '#' + BG_COLOR;
-    ctx.fillRect(0, 0, DISPLAY_PX, DISPLAY_PX);
+    ctx.fillRect(mapX0, mapY0, mapX1 - mapX0, mapY1 - mapY0);
 
-    const viewW = DISPLAY_PX / zoom, viewH = DISPLAY_PX / zoom;
+    const viewW = viewportW / zoom, viewH = viewportH / zoom;
     const cxMin = Math.max(0, Math.floor(originX / CHUNK));
     const cxMax = Math.min(CHUNKS - 1, Math.floor((originX + viewW) / CHUNK));
     const cyMin = Math.max(0, Math.floor(originY / CHUNK));
@@ -918,13 +1398,13 @@
     const sMinY = Math.floor(originY / superPx), sMaxY = Math.ceil((originY + viewH) / superPx);
     for (let s = sMinX; s <= sMaxX; s++) {
       const sx = (s * superPx - originX) * zoom;
-      if (sx < -2 || sx > DISPLAY_PX + 2) continue;
-      ctx.beginPath(); ctx.moveTo(Math.round(sx) + 0.5, 0); ctx.lineTo(Math.round(sx) + 0.5, DISPLAY_PX); ctx.stroke();
+      if (sx < -2 || sx > viewportW + 2) continue;
+      ctx.beginPath(); ctx.moveTo(Math.round(sx) + 0.5, 0); ctx.lineTo(Math.round(sx) + 0.5, viewportH); ctx.stroke();
     }
     for (let s = sMinY; s <= sMaxY; s++) {
       const sy = (s * superPx - originY) * zoom;
-      if (sy < -2 || sy > DISPLAY_PX + 2) continue;
-      ctx.beginPath(); ctx.moveTo(0, Math.round(sy) + 0.5); ctx.lineTo(DISPLAY_PX, Math.round(sy) + 0.5); ctx.stroke();
+      if (sy < -2 || sy > viewportH + 2) continue;
+      ctx.beginPath(); ctx.moveTo(0, Math.round(sy) + 0.5); ctx.lineTo(viewportW, Math.round(sy) + 0.5); ctx.stroke();
     }
 
     // tier 2: chunk lines
@@ -933,13 +1413,13 @@
       ctx.lineWidth = 1;
       for (let cx = cxMin; cx <= cxMax + 1; cx++) {
         const sx = (cx * CHUNK - originX) * zoom;
-        if (sx < -1 || sx > DISPLAY_PX + 1) continue;
-        ctx.beginPath(); ctx.moveTo(Math.round(sx) + 0.5, 0); ctx.lineTo(Math.round(sx) + 0.5, DISPLAY_PX); ctx.stroke();
+        if (sx < -1 || sx > viewportW + 1) continue;
+        ctx.beginPath(); ctx.moveTo(Math.round(sx) + 0.5, 0); ctx.lineTo(Math.round(sx) + 0.5, viewportH); ctx.stroke();
       }
       for (let cy = cyMin; cy <= cyMax + 1; cy++) {
         const sy = (cy * CHUNK - originY) * zoom;
-        if (sy < -1 || sy > DISPLAY_PX + 1) continue;
-        ctx.beginPath(); ctx.moveTo(0, Math.round(sy) + 0.5); ctx.lineTo(DISPLAY_PX, Math.round(sy) + 0.5); ctx.stroke();
+        if (sy < -1 || sy > viewportH + 1) continue;
+        ctx.beginPath(); ctx.moveTo(0, Math.round(sy) + 0.5); ctx.lineTo(viewportW, Math.round(sy) + 0.5); ctx.stroke();
       }
     }
 
@@ -951,11 +1431,11 @@
       const gyMin = Math.max(0, Math.floor(originY)), gyMax = Math.min(TOTAL, Math.ceil(originY + viewH));
       for (let gx = gxMin; gx <= gxMax; gx++) {
         const sx = (gx - originX) * zoom;
-        ctx.beginPath(); ctx.moveTo(Math.round(sx) + 0.5, 0); ctx.lineTo(Math.round(sx) + 0.5, DISPLAY_PX); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(Math.round(sx) + 0.5, 0); ctx.lineTo(Math.round(sx) + 0.5, viewportH); ctx.stroke();
       }
       for (let gy = gyMin; gy <= gyMax; gy++) {
         const sy = (gy - originY) * zoom;
-        ctx.beginPath(); ctx.moveTo(0, Math.round(sy) + 0.5); ctx.lineTo(DISPLAY_PX, Math.round(sy) + 0.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, Math.round(sy) + 0.5); ctx.lineTo(viewportW, Math.round(sy) + 0.5); ctx.stroke();
       }
     }
 
@@ -975,9 +1455,10 @@
   }
 
   function setStatus(text, isSyncing) {
-    if (!statusEl) return;
-    statusEl.textContent = text;
-    statusEl.classList.toggle('pw-syncing', !!isSyncing);
+    if (!syncDotEl) return;
+    syncDotEl.title = text;
+    syncDotEl.classList.toggle('pw-sync-syncing', !!isSyncing);
+    syncDotEl.classList.toggle('pw-sync-error', !isSyncing && /실패/.test(text));
   }
 
   // ---- chunk data / storage ----
@@ -997,6 +1478,35 @@
     }
     chunkData.set(k, defaultChunkObj());
     return k;
+  }
+
+  function getStampOffsets(radius, shape) {
+    const key = shape + '_' + radius;
+    if (stampOffsetsCache.has(key)) return stampOffsetsCache.get(key);
+    const offsets = [];
+    if (radius === 0) {
+      offsets.push([0, 0]);
+    } else {
+      const rSq = radius * radius + radius * 0.5; // slightly generous so circles don't look too thin
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          if (shape === 'circle') {
+            if (dx * dx + dy * dy <= rSq) offsets.push([dx, dy]);
+          } else {
+            offsets.push([dx, dy]);
+          }
+        }
+      }
+    }
+    stampOffsetsCache.set(key, offsets);
+    return offsets;
+  }
+
+  async function stampWorldPixel(gx, gy) {
+    const offsets = getStampOffsets(brushRadius, brushShape);
+    for (let i = 0; i < offsets.length; i++) {
+      await paintWorldPixel(gx + offsets[i][0], gy + offsets[i][1]);
+    }
   }
 
   async function paintWorldPixel(gx, gy) {
@@ -1020,7 +1530,7 @@
     const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
     let err = dx - dy, x = x0, y = y0, guard = 0;
     while (guard++ < 5000) {
-      await paintWorldPixel(x, y);
+      await stampWorldPixel(x, y);
       if (x === x1 && y === y1) break;
       const e2 = 2 * err;
       if (e2 > -dy) { err -= dy; x += sx; }
@@ -1036,6 +1546,7 @@
 
     setStatus('전송 중…', true);
     const now = Date.now();
+    const logEntries = [];
     try {
       await Promise.allSettled(toFlush.map(async (k) => {
         const edits = snapshot.get(k);
@@ -1049,6 +1560,8 @@
         edits.forEach(({ color, author }, localIdx) => {
           obj.c = obj.c.substring(0, localIdx * 6) + color + obj.c.substring(localIdx * 6 + 6);
           obj.a[localIdx] = author;
+          const lx = localIdx % CHUNK, ly = Math.floor(localIdx / CHUNK);
+          logEntries.push({ x: cx * CHUNK + lx, y: cy * CHUNK + ly, color, author });
         });
         await window.storage.set(chunkKey(cx, cy), JSON.stringify(obj), true);
         chunkData.set(k, obj);
@@ -1060,6 +1573,10 @@
       indexCache = index;
       setStatus('동기화됨', false);
       requestDraw();
+      // pixel-level history log (only present on the deployed/Supabase build, not the preview)
+      if (typeof window.wmapLog === 'function' && logEntries.length > 0) {
+        window.wmapLog(logEntries).catch(() => { /* logging is best-effort */ });
+      }
     } catch (e) {
       setStatus('저장 실패', false);
     }
