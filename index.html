@@ -427,6 +427,10 @@
   let brushRadius = 0;      // 0 = single pixel; radius in world-pixels around the cursor
   let brushShape = 'square'; // 'square' | 'circle'
   let stampOffsetsCache = new Map();
+  let gestureChanges = null; // Map "gx_gy" -> {prevColor, prevAuthor, newColor, newAuthor}, active during a stroke
+  let undoStack = [];
+  let redoStack = [];
+  const MAX_UNDO = 50;
   let timelapseEvents = [];
   let timelapseIndex = 0;
   let timelapsePlaying = false;
@@ -582,6 +586,20 @@
                 <span id="pw-size-value">1px</span>
                 <button class="pw-size-btn" id="pw-size-plus" aria-label="브러시 크기 키우기">+</button>
               </div>
+              <div class="pw-toggle-group pw-glass-toggle" id="pw-undo-redo">
+                <button class="pw-icon-btn" id="pw-undo-btn" title="되돌리기 (Ctrl+Z)" aria-label="되돌리기">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 14L4 9l5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button class="pw-icon-btn" id="pw-redo-btn" title="다시하기 (Ctrl+Shift+Z)" aria-label="다시하기">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 14l5-5-5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
             </div>
             <div class="pw-palette-block">
               <span class="pw-palette-label">기본 팔레트</span>
@@ -693,6 +711,9 @@
     });
     updateBrushSizeLabel();
 
+    document.getElementById('pw-undo-btn').addEventListener('click', performUndo);
+    document.getElementById('pw-redo-btn').addEventListener('click', performRedo);
+
     document.getElementById('pw-fit').addEventListener('click', () => {
       zoom = minZoom; rawZoom = minZoom; clampOrigin(); requestDraw();
     });
@@ -761,6 +782,20 @@
     if (!window.__wmapResizeBound) {
       window.__wmapResizeBound = true;
       window.addEventListener('resize', fitWallFrameToViewport);
+    }
+    if (!window.__wmapUndoBound) {
+      window.__wmapUndoBound = true;
+      window.addEventListener('keydown', (e) => {
+        if (isTypingTarget(e.target)) return;
+        const key = e.key.toLowerCase();
+        if ((e.ctrlKey || e.metaKey) && key === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) performRedo(); else performUndo();
+        } else if ((e.ctrlKey || e.metaKey) && key === 'y') {
+          e.preventDefault();
+          performRedo();
+        }
+      });
     }
 
     requestDraw();
@@ -1248,6 +1283,7 @@
     }
     if (e.button !== 0) return; // right-click handled by contextmenu
     isPointerDown = true;
+    beginGesture();
     const gx = Math.floor(originX + sx / zoom), gy = Math.floor(originY + sy / zoom);
     lastPaintedWorld = { x: gx, y: gy };
     stampWorldPixel(gx, gy).then(requestDraw);
@@ -1283,6 +1319,7 @@
     if (isPointerDown) {
       isPointerDown = false;
       lastPaintedWorld = null;
+      endGesture();
       flushDirty();
     }
   }
@@ -1298,6 +1335,7 @@
       const gx = Math.floor(originX + sx / zoom), gy = Math.floor(originY + sy / zoom);
       lastPaintedWorld = { x: gx, y: gy };
       isPointerDown = true;
+      beginGesture();
       stampWorldPixel(gx, gy).then(requestDraw);
     } else if (e.touches.length === 2) {
       touchMode = 'gesture';
@@ -1345,7 +1383,7 @@
     }
   }
   function onTouchEnd(e) {
-    if (touchMode === 'paint') flushDirty();
+    if (touchMode === 'paint') { endGesture(); flushDirty(); }
     if (e.touches.length === 0) { touchMode = null; isPointerDown = false; lastPaintedWorld = null; }
   }
 
@@ -1517,12 +1555,86 @@
     const lx = gx % CHUNK, ly = gy % CHUNK;
     const localIdx = ly * CHUNK + lx;
     const obj = chunkData.get(k);
-    if (obj.c.substr(localIdx * 6, 6) === selectedColor) return;
+    const prevColor = obj.c.substr(localIdx * 6, 6);
+    if (prevColor === selectedColor) return;
+    const prevAuthor = obj.a[localIdx];
     obj.c = obj.c.substring(0, localIdx * 6) + selectedColor + obj.c.substring(localIdx * 6 + 6);
     const author = selectedColor === BG_COLOR ? null : myName;
     obj.a[localIdx] = author;
     if (!pendingEdits.has(k)) pendingEdits.set(k, new Map());
     pendingEdits.get(k).set(localIdx, { color: selectedColor, author });
+
+    if (gestureChanges) {
+      const gk = `${gx}_${gy}`;
+      const existing = gestureChanges.get(gk);
+      if (existing) {
+        existing.newColor = selectedColor;
+        existing.newAuthor = author;
+      } else {
+        gestureChanges.set(gk, { prevColor, prevAuthor, newColor: selectedColor, newAuthor: author });
+      }
+    }
+  }
+
+  // ---- undo / redo (local to this browser — only reverts pixels *you* just painted) ----
+  function beginGesture() {
+    gestureChanges = new Map();
+  }
+  function endGesture() {
+    if (!gestureChanges || gestureChanges.size === 0) { gestureChanges = null; return; }
+    const entries = Array.from(gestureChanges.entries()).map(([key, v]) => {
+      const [gx, gy] = key.split('_').map(Number);
+      return { gx, gy, prevColor: v.prevColor, prevAuthor: v.prevAuthor, newColor: v.newColor, newAuthor: v.newAuthor };
+    });
+    gestureChanges = null;
+    undoStack.push(entries);
+    if (undoStack.length > MAX_UNDO) undoStack.shift();
+    redoStack = [];
+  }
+
+  async function applyPixelChange(gx, gy, color, author) {
+    if (gx < 0 || gy < 0 || gx >= TOTAL || gy >= TOTAL) return;
+    const cx = Math.floor(gx / CHUNK), cy = Math.floor(gy / CHUNK);
+    const k = `${cx}_${cy}`;
+    await ensureChunkLoaded(cx, cy);
+    const lx = gx % CHUNK, ly = gy % CHUNK;
+    const localIdx = ly * CHUNK + lx;
+    const obj = chunkData.get(k);
+    obj.c = obj.c.substring(0, localIdx * 6) + color + obj.c.substring(localIdx * 6 + 6);
+    obj.a[localIdx] = author;
+    if (!pendingEdits.has(k)) pendingEdits.set(k, new Map());
+    pendingEdits.get(k).set(localIdx, { color, author });
+  }
+
+  async function performUndo() {
+    if (undoStack.length === 0) return;
+    const entries = undoStack.pop();
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      await applyPixelChange(e.gx, e.gy, e.prevColor, e.prevAuthor);
+    }
+    redoStack.push(entries);
+    if (redoStack.length > MAX_UNDO) redoStack.shift();
+    requestDraw();
+    flushDirty();
+  }
+
+  async function performRedo() {
+    if (redoStack.length === 0) return;
+    const entries = redoStack.pop();
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      await applyPixelChange(e.gx, e.gy, e.newColor, e.newAuthor);
+    }
+    undoStack.push(entries);
+    requestDraw();
+    flushDirty();
+  }
+
+  function isTypingTarget(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
   }
 
   async function paintLine(x0, y0, x1, y1) {
